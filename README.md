@@ -4,6 +4,69 @@ This repository contains Claude Code configuration files including agents and co
 
 This is a `work in progress`. More features and commands will be added over time.
 
+# What You Get
+
+## Custom Commands
+
+### `/task` - Task Creation
+Creates structured task files with automatic complexity assessment (easy/medium/hard).
+- **Usage**: `/task "Task Name" detailed description`
+- **Example**: `/task "User Auth" Implement JWT-based authentication with refresh tokens`
+- Creates timestamped task files in `.claude/tasks/` for tracking and organization
+
+### `/task-plan` - Task Planning
+Generates detailed execution plans for existing tasks without implementing code.
+- **Usage**: `/task-plan task-name-slug`
+- Analyzes codebase architecture and patterns
+- Creates comprehensive implementation roadmap with specific todos
+- Follows CLAUDE.md patterns or detects existing conventions
+- Uses thinking mode for complex architectural decisions
+
+### `/task-exec` - Task Execution
+Executes previously planned tasks with real-time progress tracking.
+- **Usage**: `/task-exec task-name-slug`
+- Follows the execution plan step-by-step
+- Updates task file with progress logs and completed todos
+- Handles errors gracefully with detailed documentation
+- Maintains timestamped progress tracking
+
+### `/help` - Command Documentation
+Displays help for available custom commands.
+- **Usage**: `/help` (list all) or `/help <command>` (specific help)
+- Provides detailed documentation for each command
+- Shows usage examples and workflow guidance
+
+## Workflow Example
+```bash
+# 1. Create a new task
+/task "Payment Integration" Add Stripe payment processing with webhook handling
+
+# 2. Review and optionally edit the task file manually
+
+# 3. Generate detailed plan
+/task-plan payment-integration
+
+# 4. Execute the implementation
+/task-exec payment-integration
+```
+
+## Custom Agents
+
+### `security-architect-reviewer`
+A Principal Security Engineer agent specialized in security analysis and vulnerability assessment.
+
+**Capabilities**:
+- **Code Security Review**: Identifies OWASP Top 10 vulnerabilities, injection flaws, XSS, CSRF, authentication weaknesses
+- **Architecture Assessment**: Evaluates defense-in-depth, zero trust principles, encryption strategies, secrets management
+- **Actionable Recommendations**: Provides severity classifications, specific fixes with code examples, and preventive measures
+
+**When to use**:
+- After implementing authentication/authorization systems
+- When handling sensitive data or PII
+- For microservices security architecture review
+- To audit existing code for vulnerabilities
+- When implementing encryption or secure communication
+
 ## Installation
 
 Follow these steps to set up Claude Code:
