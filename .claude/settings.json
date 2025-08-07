@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "condition": "input.startsWith('/help')",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/commands/help-handler.py"
+          }
+        ]
+      },
+      {
+        "condition": "input.startsWith('/task ')",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/commands/task-handler.py"
+          }
+        ]
+      },
+      {
+        "condition": "input.startsWith('/task-plan ')",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/commands/task-plan-handler.py"
+          }
+        ]
+      },
+      {
+        "condition": "input.startsWith('/task-exec ')",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/commands/task-exec-handler.py"
+          }
+        ]
+      }
+    ]
+  }
+}
