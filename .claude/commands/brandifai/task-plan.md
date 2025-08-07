@@ -5,10 +5,10 @@ Create detailed execution plan for an existing task file
 Analyzes an existing task file and creates a detailed execution plan with specific todos, but does NOT execute any code.
 
 ## Usage
-/task-plan task-name-slug
-/task-plan user-authentication  
-/task-plan payment-bug-fix
-/task-plan reports-api
+/brandifai:task-plan task-name-slug
+/brandifai:task-plan user-authentication  
+/brandifai:task-plan payment-bug-fix
+/brandifai:task-plan reports-api
 
 ## What it does
 1. Finds the task file by name in `.claude/tasks/` directory
@@ -174,10 +174,10 @@ When CLAUDE.md is absent, structure the plan to include:
 6. **Migration/Deployment Notes**: Any special considerations for rollout
 
 ## Workflow
-1. First use `/task` to create the task file
+1. First use `/brandifai:task` to create the task file
 2. Optionally edit the task file to add more context
-3. Use `/task-plan` to generate the execution plan (PLANNING ONLY)
-4. Finally use `/task-exec` to execute the planned implementation
+3. Use `/brandifai:task-plan` to generate the execution plan (PLANNING ONLY)
+4. Finally use `/brandifai:task-exec` to execute the planned implementation
 
 ## Completion Criteria
 The command is complete when:

@@ -106,7 +106,7 @@ echo
 echo "Steps:"
 echo "1. Open the settings file from this repo: $SCRIPT_DIR/.claude/settings.json"
 echo "2. Open your global settings file: ~/.claude/settings.json (create it if it doesn't exist)"
-echo "3. Manually copy the 'commands' and 'agents' sections into your global settings"
+echo "3. Manually copy the 'hooks' sections into your global settings"
 echo "4. Make sure to preserve any existing settings you already have"
 echo
 echo "This manual merge ensures you don't lose any existing custom commands or configurations."

@@ -6,12 +6,12 @@ Creates a structured task file in `.claude/tasks/` with the provided task name a
 This command ONLY creates the file structure - it does not generate plans or execute code.
 
 ## Usage
-/task "User Authentication" Implement secure user authentication system with JWT tokens, password hashing, and session management
-/task "Payment Bug Fix" Fix the bug in payment processing where transactions fail for amounts over $1000
-/task "Reports API" Add new API endpoint for generating and retrieving user activity reports
+/brandifai:task "User Authentication" Implement secure user authentication system with JWT tokens, password hashing, and session management
+/brandifai:task "Payment Bug Fix" Fix the bug in payment processing where transactions fail for amounts over $1000
+/brandifai:task "Reports API" Add new API endpoint for generating and retrieving user activity reports
 
 ## Backward Compatibility
-/task implement user authentication (still works - uses entire text as both name and description)
+/brandifai:task implement user authentication (still works - uses entire text as both name and description)
 
 ## What it does
 1. Parses task name (in quotes) and detailed description
@@ -28,10 +28,10 @@ The command automatically assesses task complexity based on keywords and pattern
 - **Hard**: Backend systems, APIs, databases, architecture, security, integrations
 
 ## New Workflow
-1. **Create task**: `/task "Task Name" detailed description`
+1. **Create task**: `/brandifai:task "Task Name" detailed description`
 2. **Edit context** (optional): Manually edit the task file to add more context
-3. **Plan implementation**: `/task-plan task-name-slug` to generate detailed execution plan
-4. **Execute**: `/task-exec task-name-slug` to execute the planned implementation
+3. **Plan implementation**: `/brandifai:task-plan task-name-slug` to generate detailed execution plan
+4. **Execute**: `/brandifai:task-exec task-name-slug` to execute the planned implementation
 
 ## Why the Change?
 This separation allows you to:

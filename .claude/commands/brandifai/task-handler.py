@@ -72,8 +72,27 @@ def main():
     hook_data = json.loads(sys.stdin.read())
     user_input = hook_data.get('input', '')
 
-    if user_input.startswith('/task '):
-        task_input = user_input[6:]  # Remove '/task '
+    if user_input.startswith('/brandifai:task '):
+        task_input = user_input[16:].strip()  # Remove '/brandifai:task '
+        
+        # Check if input is empty
+        if not task_input:
+            error_msg = """ERROR: Invalid usage of /brandifai:task command.
+
+Correct usage: /brandifai:task "Task Name" detailed description
+
+Examples:
+  /brandifai:task "User Auth" Implement JWT-based authentication with refresh tokens
+  /brandifai:task "Payment Integration" Add Stripe payment processing with webhook handling
+  
+The task name should be in quotes, followed by a detailed description."""
+            
+            result = {
+                "input": error_msg,
+                "continue": False
+            }
+            print(json.dumps(result))
+            return
 
         # Parse task name and description
         if task_input.startswith('"'):
@@ -82,10 +101,44 @@ def main():
             if end_quote != -1:
                 task_name_raw = task_input[1:end_quote]
                 task_description = task_input[end_quote + 1:].strip()
+                
+                # Validate that we have both name and description
+                if not task_name_raw:
+                    error_msg = """ERROR: Task name cannot be empty.
+
+Correct usage: /brandifai:task "Task Name" detailed description"""
+                    result = {
+                        "input": error_msg,
+                        "continue": False
+                    }
+                    print(json.dumps(result))
+                    return
+                    
+                if not task_description:
+                    error_msg = """ERROR: Task description is required.
+
+Correct usage: /brandifai:task "Task Name" detailed description
+
+Example: /brandifai:task "User Auth" Implement JWT-based authentication with refresh tokens"""
+                    result = {
+                        "input": error_msg,
+                        "continue": False
+                    }
+                    print(json.dumps(result))
+                    return
             else:
-                # No closing quote found, treat entire input as description
-                task_name_raw = task_input
-                task_description = task_input
+                # No closing quote found
+                error_msg = """ERROR: Task name must be enclosed in quotes.
+
+Correct usage: /brandifai:task "Task Name" detailed description
+
+Example: /brandifai:task "User Auth" Implement JWT-based authentication with refresh tokens"""
+                result = {
+                    "input": error_msg,
+                    "continue": False
+                }
+                print(json.dumps(result))
+                return
         else:
             # No quotes, treat entire input as description (backward compatibility)
             task_name_raw = task_input
@@ -120,7 +173,7 @@ def main():
 
 ## Progress Log
 ### {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-- Task created via /task command
+- Task created via /brandifai:task command
 - Complexity assessed as: {complexity}
 
 ## Changes Made
@@ -160,7 +213,7 @@ def main():
         print(f"File size: {os.path.getsize(filename) if os.path.exists(filename) else 'N/A'} bytes")
 
         # Just acknowledge task creation, no planning
-        new_input = f"Task file created successfully at {filename}. You can now manually edit the file to add more context if needed, then use '/task-plan {task_name}' to create the execution plan."
+        new_input = f"Task file created successfully at {filename}. You can now manually edit the file to add more context if needed, then use '/brandifai:task-plan {task_name}' to create the execution plan."
 
         # Return modified input
         result = {

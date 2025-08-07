@@ -10,14 +10,24 @@ def main():
   hook_data = json.loads(sys.stdin.read())
   user_input = hook_data.get('input', '')
 
-  if user_input.startswith('/task-plan '):
-    task_name_slug = user_input[11:].strip()  # Remove '/task-plan '
+  if user_input.startswith('/brandifai:task-plan '):
+    task_name_slug = user_input[21:].strip()  # Remove '/brandifai:task-plan '
     
     if not task_name_slug:
-      print("Error: Please provide a task name")
+      error_msg = """ERROR: Invalid usage of /brandifai:task-plan command.
+
+Correct usage: /brandifai:task-plan task-name-slug
+
+Examples:
+  /brandifai:task-plan user-auth
+  /brandifai:task-plan payment-integration
+  /brandifai:task-plan api-endpoints
+
+The task-name-slug should match a previously created task file."""
+      
       result = {
-        "input": "Error: Please provide a task name for /task-plan command",
-        "continue": True
+        "input": error_msg,
+        "continue": False
       }
       print(json.dumps(result))
       return
@@ -28,7 +38,7 @@ def main():
     if not task_files:
       print(f"Error: No task file found for '{task_name_slug}'")
       result = {
-        "input": f"Error: No task file found for '{task_name_slug}'. Use '/task' to create it first.",
+        "input": f"Error: No task file found for '{task_name_slug}'. Use '/brandifai:task' to create it first.",
         "continue": True
       }
       print(json.dumps(result))

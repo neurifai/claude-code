@@ -9,8 +9,28 @@ def main():
     hook_data = json.loads(sys.stdin.read())
     user_input = hook_data.get('input', '')
 
-    if user_input.startswith('/task-exec '):
-        task_file_pattern = user_input[11:].strip()  # Remove '/task-exec '
+    if user_input.startswith('/brandifai:task-exec '):
+        task_file_pattern = user_input[21:].strip()  # Remove '/brandifai:task-exec '
+        
+        # Check if input is empty
+        if not task_file_pattern:
+            error_msg = """ERROR: Invalid usage of /brandifai:task-exec command.
+
+Correct usage: /brandifai:task-exec task-name-slug
+
+Examples:
+  /brandifai:task-exec user-auth
+  /brandifai:task-exec payment-integration
+  /brandifai:task-exec api-endpoints
+
+The task-name-slug should match a previously planned task file."""
+            
+            result = {
+                "input": error_msg,
+                "continue": False
+            }
+            print(json.dumps(result))
+            return
         
         # Find the task file
         task_file = None
@@ -45,11 +65,18 @@ def main():
             print(f"Found task file: {task_file}")
         else:
             # Task file not found
-            new_input = f"Task file not found for pattern: {task_file_pattern}. Please check the file name or use /help task-exec for usage instructions."
+            error_msg = f"""ERROR: Task file not found for: {task_file_pattern}
+
+Please ensure:
+1. You've created the task using: /brandifai:task "Task Name" description
+2. You've planned the task using: /brandifai:task-plan {task_file_pattern}
+3. The task-name-slug matches the task file name
+
+Use /brandifai:help task-exec for more information."""
             
             result = {
-                "input": new_input,
-                "continue": True
+                "input": error_msg,
+                "continue": False
             }
             print(f"Task file not found for pattern: {task_file_pattern}")
         

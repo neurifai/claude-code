@@ -3,9 +3,9 @@
 Execute a previously planned task from a task file.
 
 ## Usage
-/task-exec <task-file-name>         # Execute task by file pattern
-/task-exec social-media-scheduler   # Execute task matching this pattern
-/task-exec .claude/tasks/20250731_161601_social_media_scheduler_backend.md  # Execute specific file
+/brandifai:task-exec <task-file-name>         # Execute task by file pattern
+/brandifai:task-exec social-media-scheduler   # Execute task matching this pattern
+/brandifai:task-exec .claude/tasks/20250731_161601_social_media_scheduler_backend.md  # Execute specific file
 
 ## What it does
 1. Finds the task file matching the given pattern or name

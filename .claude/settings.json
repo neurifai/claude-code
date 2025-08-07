@@ -2,38 +2,38 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "condition": "input.startsWith('/help')",
+        "condition": "input.startsWith('/brandifai:help')",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/commands/help-handler.py"
+            "command": "python3 ~/.claude/commands/brandifai/help-handler.py"
           }
         ]
       },
       {
-        "condition": "input.startsWith('/task ')",
+        "condition": "input.startsWith('/brandifai:task ')",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/commands/task-handler.py"
+            "command": "python3 ~/.claude/commands/brandifai/task-handler.py"
           }
         ]
       },
       {
-        "condition": "input.startsWith('/task-plan ')",
+        "condition": "input.startsWith('/brandifai:task-plan ')",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/commands/task-plan-handler.py"
+            "command": "python3 ~/.claude/commands/brandifai/task-plan-handler.py"
           }
         ]
       },
       {
-        "condition": "input.startsWith('/task-exec ')",
+        "condition": "input.startsWith('/brandifai:task-exec ')",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/commands/task-exec-handler.py"
+            "command": "python3 ~/.claude/commands/brandifai/task-exec-handler.py"
           }
         ]
       }
