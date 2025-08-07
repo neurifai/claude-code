@@ -95,23 +95,23 @@ else
 fi
 
 echo
-echo "========================================="
-echo "IMPORTANT: Manual Configuration Required"
-echo "========================================="
+echo -e "\033[32m========================================="
+echo -e "IMPORTANT: Manual Configuration Required"
+echo -e "=========================================\033[0m"
 echo
-echo "You must manually merge the settings from this repository into your ~/.claude/settings.json file."
+echo -e "\033[32mYou must manually merge the settings from this repository into your ~/.claude/settings.json file.\033[0m"
 echo
-echo "DO NOT simply copy/overwrite the file as you may have existing custom settings!"
+echo -e "\033[32mDO NOT simply copy/overwrite the file as you may have existing custom settings!\033[0m"
 echo
-echo "Steps:"
-echo "1. Open the settings file from this repo: $SCRIPT_DIR/.claude/settings.json"
-echo "2. Open your global settings file: ~/.claude/settings.json (create it if it doesn't exist)"
-echo "3. Manually copy the 'hooks' sections into your global settings"
-echo "4. Make sure to preserve any existing settings you already have"
+echo -e "\033[32mSteps:\033[0m"
+echo -e "\033[32m1. Open the settings file from this repo: $SCRIPT_DIR/.claude/settings.json\033[0m"
+echo -e "\033[32m2. Open your global settings file: ~/.claude/settings.json (create it if it doesn't exist)\033[0m"
+echo -e "\033[32m3. Manually copy the 'hooks' sections into your global settings\033[0m"
+echo -e "\033[32m4. Make sure to preserve any existing settings you already have\033[0m"
 echo
-echo "This manual merge ensures you don't lose any existing custom commands or configurations."
+echo -e "\033[32mThis manual merge ensures you don't lose any existing custom commands or configurations.\033[0m"
 echo
-echo "========================================="
+echo -e "\033[32m=========================================\033[0m"
 echo
 echo "Setup completed successfully!"
 echo "Claude configuration files have been installed to: $CLAUDE_HOME"
