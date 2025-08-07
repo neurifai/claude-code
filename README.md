@@ -93,6 +93,20 @@ This will:
 - Create the `~/.claude` directory if it doesn't exist
 - Copy the `agents` and `commands` folders to `~/.claude`
 
+### 4. **⚠️ IMPORTANT: Manually merge the settings.json content**
+
+**You MUST manually merge the settings from this repository into your ~/.claude/settings.json file:**
+
+**DO NOT simply copy/overwrite the file - you may lose existing custom settings!**
+
+**Steps to merge:**
+1. Open `.claude/settings.json` from this repository
+2. Open your global settings file `~/.claude/settings.json` (create it if it doesn't exist)
+3. Copy the `commands` and `agents` sections from the repo's settings.json
+4. Add them to your global settings.json, preserving any existing configurations
+
+**Why manual merge?** This ensures you don't accidentally overwrite any custom commands, agents, or other settings you may already have configured.
+
 After setup, activate the virtual environment (if created):
 ```bash
 source .venv/bin/activate

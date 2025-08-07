@@ -95,5 +95,23 @@ else
 fi
 
 echo
+echo "========================================="
+echo "IMPORTANT: Manual Configuration Required"
+echo "========================================="
+echo
+echo "You must manually merge the settings from this repository into your ~/.claude/settings.json file."
+echo
+echo "DO NOT simply copy/overwrite the file as you may have existing custom settings!"
+echo
+echo "Steps:"
+echo "1. Open the settings file from this repo: $SCRIPT_DIR/.claude/settings.json"
+echo "2. Open your global settings file: ~/.claude/settings.json (create it if it doesn't exist)"
+echo "3. Manually copy the 'commands' and 'agents' sections into your global settings"
+echo "4. Make sure to preserve any existing settings you already have"
+echo
+echo "This manual merge ensures you don't lose any existing custom commands or configurations."
+echo
+echo "========================================="
+echo
 echo "Setup completed successfully!"
 echo "Claude configuration files have been installed to: $CLAUDE_HOME"
