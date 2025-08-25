@@ -51,6 +51,13 @@ When executing a task file, Claude must:
 
 ### Execution Guidelines
 
+#### Plan Verification
+- Review the entire execution plan before starting
+- Identify dependencies between TODOs
+- Where appropriate, spawn sub-agents for complex tasks
+- Follow the plan as closely as possible
+- If deviations are necessary, document them in the progress log
+
 #### Code Quality Checks
 - Run linters/formatters after creating new files (if configured)
 - Ensure new code follows existing patterns identified during planning
