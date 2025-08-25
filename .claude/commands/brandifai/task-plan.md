@@ -28,6 +28,67 @@ During task planning, Claude is RESTRICTED to:
 ## Architecture Patterns
 The command ensures Claude follows established patterns:
 
+### Apply Universal Best Practices
+Regardless of stack, ensure the plan follows:
+
+**Security First**
+- Input validation at all entry points
+- Authentication/authorization checks where needed
+- Sanitization of user-provided data
+  - Never trust client-side validation alone
+  - Validate and sanitize on the server side as well
+- Secure handling of sensitive information
+- Protection against common vulnerabilities (XSS, SQL injection, CSRF)
+- Prefer environment variables or SSM parameters for secrets
+- Follow principle of least privilege
+- Take privilege escalation into account
+- IDOR prevention 
+  - Always verify that the current user is authorized to access the resource 
+  - Avoid predictable identifiers - use ksuids or UUIDs instead of sequential IDs 
+  - Make sure users can only access what they absolutely need
+
+**Code Organization**
+- Single Responsibility Principle (one function/class, one purpose)
+- DRY (Don't Repeat Yourself) - identify reusable components
+- Separation of concerns (business logic, data access, presentation)
+- Dependency injection over hard dependencies
+- Prefer composition to inheritance
+- Keep methods/ functions small and focused
+  - consider breaking down functions longer than ~30 lines
+  - aim for functions that do one thing well
+- Consistent naming conventions
+  - use descriptive names for functions
+  - follow language specific conventions (camelCase, PascalCase, snake_case)
+- Modular structure (feature-based or domain-driven design)
+  - prefer interfaces and abstractions
+- Keep classes and files focused on a single responsibility
+- Comprehensive unit tests for new functionality
+- Integration tests for critical paths
+- End-to-end tests for user flows if applicable
+
+**Performance Considerations**
+- Identify potential bottlenecks (N+1 queries, unnecessary loops)
+- Plan for caching strategies where appropriate
+- Consider lazy loading for heavy resources
+- Optimize database queries and API calls
+- Plan for pagination of large datasets
+
+**Error Handling Strategy**
+- Comprehensive error handling at all levels
+- User-friendly error messages
+- Proper logging for debugging
+- Graceful degradation where possible
+- Consistent error response formats
+
+### Documentation Requirements
+Plan for:
+- Inline comments for complex logic
+- Function/method documentation
+- API endpoint documentation
+- README updates if adding new features
+- Configuration documentation for new settings
+- CLAUDE.md updates if architecture patterns change
+
 ### Primary Source: CLAUDE.md
 First check for architecture patterns defined in CLAUDE.md. If present, these take precedence as they represent project-specific conventions.
 
@@ -47,38 +108,7 @@ Before planning, scan the codebase for:
 - **Common patterns**: How are similar features currently implemented?
 - **Test structure**: Location and naming of test files, testing frameworks used
 
-#### 3. Apply Universal Best Practices
-Regardless of stack, ensure the plan follows:
-
-**Security First**
-- Input validation at all entry points
-- Authentication/authorization checks where needed
-- Sanitization of user-provided data
-- Secure handling of sensitive information
-- Protection against common vulnerabilities (XSS, SQL injection, CSRF)
-
-**Code Organization**
-- Single Responsibility Principle (one function/class, one purpose)
-- DRY (Don't Repeat Yourself) - identify reusable components
-- Separation of concerns (business logic, data access, presentation)
-- Dependency injection over hard dependencies
-- Prefer composition over inheritance
-
-**Performance Considerations**
-- Identify potential bottlenecks (N+1 queries, unnecessary loops)
-- Plan for caching strategies where appropriate
-- Consider lazy loading for heavy resources
-- Optimize database queries and API calls
-- Plan for pagination of large datasets
-
-**Error Handling Strategy**
-- Comprehensive error handling at all levels
-- User-friendly error messages
-- Proper logging for debugging
-- Graceful degradation where possible
-- Consistent error response formats
-
-#### 4. Stack-Specific Conventions
+#### 3. Stack-Specific Conventions
 
 **For React/Next.js projects:**
 - Prefer functional components with hooks
@@ -155,14 +185,6 @@ Regardless of stack, ensure the plan follows:
 - Use consistent date/time handling (Java LocalDateTime ↔ TypeScript Date)
 - Plan for proper authentication flow (JWT tokens, session management)
 - Consider build pipeline integration (Maven/Gradle with Angular CLI)
-
-#### 5. Documentation Requirements
-Plan for:
-- Inline comments for complex logic
-- Function/method documentation
-- API endpoint documentation
-- README updates if adding new features
-- Configuration documentation for new settings
 
 ### Planning Output Structure
 When CLAUDE.md is absent, structure the plan to include:
