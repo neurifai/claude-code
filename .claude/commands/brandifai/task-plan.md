@@ -13,10 +13,12 @@ Analyzes an existing task file and creates a detailed execution plan with specif
 ## What it does
 1. Finds the task file by name in `.claude/tasks/` directory
 2. Reads the existing task content and complexity assessment
-3. Creates a detailed execution plan following architecture patterns defined in CLAUDE.md. If there is no CLAUDE.md, use best practices for the given technology stack
-4. Updates the task file with specific todos and implementation steps
-5. Uses thinking mode for medium/hard complexity tasks to work through design decisions
-6. **STOPS after planning - does not implement any code changes**
+3. **Performs required codebase analysis** to understand existing patterns
+4. Creates a detailed execution plan following architecture patterns defined in CLAUDE.md. If there is no CLAUDE.md, use best practices for the given technology stack
+5. Updates the task file with specific todos and implementation steps using structured template
+6. Uses thinking mode for medium/hard complexity tasks to work through design decisions
+7. **Validates the plan** against completion checklist
+8. **STOPS after planning - does not implement any code changes**
 
 ## Strict Planning-Only Constraints
 During task planning, Claude is RESTRICTED to:
@@ -100,13 +102,32 @@ If CLAUDE.md is not found, analyze the existing codebase to identify patterns an
 - Identify framework-specific files (next.config.js, django settings.py, etc.)
 - Check for configuration files that indicate tech choices (.eslintrc, tsconfig.json, etc.)
 
-#### 2. Analyze Existing Patterns
-Before planning, scan the codebase for:
+#### 2. Analyze Existing Patterns (REQUIRED)
+Before planning, you MUST execute these analysis steps:
+
+**Pattern Detection Commands:**
+```bash
+# Find class inheritance patterns
+grep -r "class.*extends" --include="*.ts" --include="*.js" --include="*.java"
+
+# Find constructor dependencies
+grep -r "constructor(" --include="*.ts" --include="*.java"
+
+# Identify test patterns
+find . -name "*.test.*" -o -name "*.spec.*" | head -10
+
+# Find build/lint commands
+grep -E "build|compile|lint|test" package.json pom.xml build.gradle
+```
+
+**Document These Patterns:**
 - **Directory structure**: Identify if using MVC, feature-based, or domain-driven organization
 - **Naming conventions**: File naming (kebab-case, PascalCase), variable naming patterns
+- **Import patterns**: How are dependencies imported (relative vs absolute paths)
 - **Code style**: Indentation, bracket placement, import organization
 - **Common patterns**: How are similar features currently implemented?
 - **Test structure**: Location and naming of test files, testing frameworks used
+- **Error handling**: How are errors typically handled (try-catch, error boundaries, etc.)
 
 #### 3. Stack-Specific Conventions
 
@@ -186,14 +207,61 @@ Before planning, scan the codebase for:
 - Plan for proper authentication flow (JWT tokens, session management)
 - Consider build pipeline integration (Maven/Gradle with Angular CLI)
 
-### Planning Output Structure
-When CLAUDE.md is absent, structure the plan to include:
-1. **Context**: Brief analysis of existing patterns found
-2. **Approach**: High-level strategy following detected conventions
-3. **Detailed Steps**: Specific implementation tasks
-4. **Considerations**: Trade-offs, alternatives considered
-5. **Testing Strategy**: How the implementation will be tested
-6. **Migration/Deployment Notes**: Any special considerations for rollout
+### Required Planning Output Structure
+Your plan MUST include ALL of these sections:
+
+#### 1. Prerequisites Check
+- [ ] List all dependencies with exact versions
+- [ ] Document all files to be modified with line numbers
+- [ ] List new files to be created with full paths
+
+#### 2. Implementation Steps
+Provide numbered steps with specific details:
+```
+1. Create authentication handler at /src/handlers/authHandler.ts
+   - Extends: BaseHandler (from /src/handlers/base.ts:15)
+   - Imports: jwt from 'jsonwebtoken', User from '../types/user'
+   - Methods: validateToken(), refreshToken(), logout()
+
+2. Modify user service at /src/services/userService.ts:45-67
+   - Add: authentication methods
+   - Update: constructor to include AuthConfig dependency
+```
+
+#### 3. File Modifications Table
+| File Path | Change Type | Line Numbers | Description |
+|-----------|-------------|--------------|-------------|
+| /src/handlers/authHandler.ts | Create | N/A | New authentication handler |
+| /src/services/userService.ts | Edit | 45-67 | Add auth methods |
+| /src/types/auth.d.ts | Create | N/A | Type definitions |
+| package.json | Edit | 15 | Add jsonwebtoken dependency |
+
+#### 4. Code Snippets
+Include actual code for complex parts:
+```typescript
+// Example implementation pattern
+async validateJWT(token: string): Promise<User> {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return await this.userService.findById(decoded.userId);
+  } catch (error) {
+    throw new UnauthorizedError('Invalid token');
+  }
+}
+```
+
+#### 5. Testing Checklist
+- [ ] Unit tests for: validateJWT, refreshToken, logout
+- [ ] Integration tests for: auth flow, token expiry
+- [ ] Edge cases: expired tokens, malformed tokens, missing tokens
+- [ ] Test file locations: /src/handlers/__tests__/authHandler.test.ts
+
+#### 6. Rollback Plan
+Step-by-step to undo if needed:
+1. Remove /src/handlers/authHandler.ts
+2. Revert /src/services/userService.ts to previous version
+3. Remove auth types from /src/types/auth.d.ts
+4. Remove jsonwebtoken from package.json and run npm install
 
 ## Workflow
 1. First use `/brandifai:task` to create the task file
@@ -201,15 +269,45 @@ When CLAUDE.md is absent, structure the plan to include:
 3. Use `/brandifai:task-plan` to generate the execution plan (PLANNING ONLY)
 4. Finally use `/brandifai:task-exec` to execute the planned implementation
 
+## Plan Completion Checklist
+A plan is ready for execution when it includes:
+- [ ] Exact file paths with line numbers for modifications
+- [ ] Complete code snippets for complex logic
+- [ ] Specific test cases to implement with file locations
+- [ ] All required imports and dependencies with versions
+- [ ] Database migration scripts (if applicable)
+- [ ] Configuration changes needed (env vars, settings)
+- [ ] Rollback instructions for each change
+- [ ] Error handling strategy documented
+- [ ] Performance considerations addressed
+- [ ] Security implications reviewed
+
 ## Completion Criteria
 The command is complete when:
-- Detailed execution plan is documented in the task file
-- All implementation steps are broken down into specific todos
+- All items in the Plan Completion Checklist are addressed
+- Detailed execution plan is documented in the task file using the structured template
+- All implementation steps are broken down with specific file:line references
 - Architecture decisions are documented with reasoning
 - Task file is updated with comprehensive plan
 - Claude explicitly states "Task planning complete - ready for execution phase"
 
-## Complexity Support
-- **Easy tasks**: Basic planning approach
-- **Medium tasks**: Enables thinking mode for complex design decisions
-- **Hard tasks**: Enables think hard or ultrathink for deep architectural planning
+## Complexity-Based Requirements
+
+### Easy Tasks
+- Focus on: File locations, method signatures, basic error handling
+- Minimum plan sections: Prerequisites, Implementation Steps, File Modifications
+- Test requirements: Basic unit tests
+
+### Medium Tasks  
+- Include: Dependency analysis, integration points, data flow, state management
+- All plan sections required
+- Test requirements: Unit tests + integration tests
+- Use thinking mode for design decisions
+
+### Hard Tasks
+- Required: Architecture diagrams (ASCII or descriptions), sequence flows, security analysis
+- Performance considerations mandatory
+- Database schema changes must include migrations
+- Test requirements: Unit + integration + performance tests
+- Use thinking mode for thorough architectural analysis
+- Consider scalability, maintainability, and technical debt

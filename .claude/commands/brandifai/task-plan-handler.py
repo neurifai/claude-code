@@ -87,16 +87,73 @@ The task-name-slug should match a previously created task file."""
       print(json.dumps(result))
       return
 
+    # Check for CLAUDE.md to determine architecture patterns
+    architecture_context = ""
+    if os.path.exists('CLAUDE.md'):
+      try:
+        with open('CLAUDE.md', 'r') as f:
+          architecture_context = "Follow the architecture patterns defined in CLAUDE.md."
+      except:
+        architecture_context = "Analyze and follow the existing codebase patterns."
+    else:
+      architecture_context = "Analyze and follow the existing codebase patterns."
+    
     # Output for Claude to see
     print(f"Found task file: {task_file}")
     print(f"Complexity: {complexity}")
     print(f"Description: {task_description}")
 
-    # Create detailed planning instruction with strict constraints
-    if complexity in ['medium', 'hard']:
-        thinking_instruction = " Use <claude:thinking> tags to work through the complexity and design decisions."
-    else:
+    # Create complexity-based analysis requirements
+    if complexity == 'easy':
+        analysis_depth = "Focus on: File locations, method signatures, basic error handling, simple test cases."
         thinking_instruction = ""
+    elif complexity == 'medium':
+        analysis_depth = "Include: Dependency analysis, integration points, data flow, state management, comprehensive error handling."
+        thinking_instruction = " Use <claude:thinking> tags to work through the design decisions."
+    else:  # hard
+        analysis_depth = "Required: Architecture diagrams, sequence flows, security analysis, performance considerations, database schema changes, scalability concerns."
+        thinking_instruction = " Use <claude:thinking> tags to thoroughly analyze the complex architectural decisions."
+    
+    # Create structured plan template
+    plan_template = """
+## Implementation Plan Structure
+
+### 1. Prerequisites Check
+- [ ] Dependencies and imports needed
+- [ ] Files that will be modified (with line numbers)
+- [ ] New files to be created
+
+### 2. Implementation Steps
+[Break down into numbered steps with specific file:line references]
+
+### 3. File Modifications Table
+| File Path | Change Type | Line Numbers | Description |
+|-----------|-------------|--------------|-------------|
+| [path]    | Edit/Create | [lines]      | [changes]   |
+
+### 4. Code Patterns
+[Include actual code snippets for complex parts]
+
+### 5. Testing Checklist
+- [ ] Unit tests for: [list specific functions]
+- [ ] Integration tests for: [list integration points]
+- [ ] Edge cases: [list edge cases to handle]
+
+### 6. Rollback Plan
+[Step-by-step instructions to undo changes if needed]
+"""
+
+    validation_checklist = """
+PLAN VALIDATION CHECKLIST:
+□ All file paths are absolute and verified to exist (or marked as NEW)
+□ Line numbers provided for existing file modifications
+□ Import statements are complete and exact
+□ Function/method signatures include proper types
+□ Database/API changes include migration steps
+□ Error handling is explicitly planned
+□ Test file locations and names are specified
+□ Configuration changes are documented
+"""
     
     constraints = """
 CRITICAL CONSTRAINTS FOR TASK PLANNING:
@@ -107,7 +164,39 @@ CRITICAL CONSTRAINTS FOR TASK PLANNING:
 - Do NOT create, modify, or delete any code files during planning
 - Do NOT use implementation tools like Write, MultiEdit, or Bash commands"""
     
-    new_input = f"I found the task file at {task_file}. Please analyze this task and create a detailed execution plan with specific todos.{thinking_instruction} Follow the existing fueler-server architecture patterns: Lambda handlers extend Base classes, services take DynamoDbHelper as constructor dependency, no repository layer. Update the task file with your execution plan, then STOP.{constraints} Task: {task_description}"
+    # Add required codebase analysis phase
+    codebase_analysis = """
+REQUIRED CODEBASE ANALYSIS:
+Before planning, you MUST:
+1. Identify existing patterns for similar features (use Grep/Glob)
+2. Find and document exact import statements needed
+3. Locate specific base classes/interfaces to extend
+4. Document naming conventions (files, functions, variables)
+5. Find configuration files that may need updates
+6. Identify test file patterns and locations
+"""
+    
+    new_input = f"""I found the task file at {task_file}.
+
+{codebase_analysis}
+
+{analysis_depth}
+
+Please analyze this task and create a detailed execution plan following this structure:
+{plan_template}
+
+Ensure your plan meets these validation criteria:
+{validation_checklist}
+
+{thinking_instruction}
+
+{architecture_context}
+
+Update the task file with your detailed execution plan, then STOP.
+
+{constraints}
+
+Task: {task_description}"""
 
     # Return modified input
     result = {
