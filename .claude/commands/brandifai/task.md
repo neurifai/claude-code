@@ -2,8 +2,8 @@ Create a new task file with structured template
 
 # Task Command
 
-Creates a structured task file in `.claude/tasks/` with the provided task name and description. 
-This command ONLY creates the file structure - it does not generate plans or execute code.
+Creates a structured task file in `.claude/tasks/` with the provided task name and description.
+⚠️ CRITICAL: This command ONLY creates the file structure - Claude must NOT generate plans, write code, or execute anything. Just acknowledge the file creation.
 
 ## Usage
 /brandifai:task "User Authentication" Implement secure user authentication system with JWT tokens, password hashing, and session management

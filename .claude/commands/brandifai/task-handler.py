@@ -212,8 +212,11 @@ Example: /brandifai:task "User Auth" Implement JWT-based authentication with ref
         print(f"File exists: {os.path.exists(filename)}")
         print(f"File size: {os.path.getsize(filename) if os.path.exists(filename) else 'N/A'} bytes")
 
-        # Just acknowledge task creation, no planning
-        new_input = f"Task file created successfully at {filename}. You can now manually edit the file to add more context if needed, then use '/brandifai:task-plan {task_name}' to create the execution plan."
+        # Prevent any code execution attempts
+        if any(keyword in task_description.lower() for keyword in ['implement', 'write', 'create', 'build', 'develop']):
+            new_input = f"STOP: Task file created at {filename}. DO NOT write any code. Use '/brandifai:task-plan {task_name}' to plan, then '/brandifai:task-exec {task_name}' to execute."
+        else:
+            new_input = f"IMPORTANT: Task file created at {filename}. NO CODE IMPLEMENTATION REQUIRED. This command ONLY creates the task structure. To proceed: 1) Optionally edit the file manually, 2) Run '/brandifai:task-plan {task_name}' for planning, 3) Run '/brandifai:task-exec {task_name}' for execution."
 
         # Return modified input
         result = {
