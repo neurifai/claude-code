@@ -25,12 +25,39 @@ Execute a previously planned task from a task file.
 - **Error handling**: If no match found, lists available task files
 
 ## Pre-Execution Validation
-Before executing, Claude must verify:
-- Task file exists and is readable
-- Task has been properly planned (contains execution plan/todos)
-- No critical blockers are documented in the task
-- Required dependencies/tools are available
-- Task status is not already "completed"
+The handler automatically validates:
+- **Task Status**: Checks if task is already completed, failed, or blocked
+  - COMPLETED tasks are rejected (user must update Final Status to re-execute)
+  - FAILED tasks show warning but allow retry
+  - BLOCKED tasks are rejected until issues resolved
+- **Plan Completeness**: Validates presence of:
+  - Implementation Plan or Execution Plan section
+  - File Modifications table with structured format
+  - Uncompleted todos (- [ ] format)
+  - Implementation Steps section
+  - No unfilled "[To be filled by Claude]" sections
+- **File Structure**: Ensures task file exists and is readable
+
+## Execution Strategy Selection
+The handler determines execution approach based on assessed complexity:
+
+### EASY Complexity
+- **Strategy**: Sequential execution
+- **Agent Usage**: No sub-agents
+- **Validation**: Basic checks only
+- **Commits**: Single commit at end
+
+### MEDIUM Complexity (Default)
+- **Strategy**: Sequential with milestones
+- **Agent Usage**: No sub-agents typically
+- **Validation**: Standard testing and validation
+- **Commits**: At logical milestones
+
+### HARD Complexity
+- **Strategy**: Phased execution
+- **Agent Usage**: Spawn sub-agents for complex subtasks
+- **Validation**: Comprehensive testing and validation
+- **Commits**: After each major phase
 
 ## Task Execution Requirements
 
@@ -90,35 +117,49 @@ When executing a task file, Claude must:
 - Update task status to "blocked" or "failed"
 - Provide clear next steps for resolution
 
+## Structured Execution Process
+
+The handler provides detailed execution instructions including:
+
+### Execution Phases
+1. **Phase 1: Setup** - Create new files, add dependencies
+2. **Phase 2: Implementation** - Modify existing files per plan
+3. **Phase 3: Testing** - Run tests, fix issues
+4. **Phase 4: Validation** - Run lint/build, verify all changes
+
 ### Progress Log Format
+Use this template for each progress entry:
 ```markdown
-## Progress Log
-
-### 2025-08-01 10:30:00 - Task Execution Started
-- Started executing Social Media Scheduler Backend task
-- Analyzed existing codebase structure and patterns
-- Validated all dependencies available
-- Estimated completion time: 45 minutes
-
-### 2025-08-01 10:35:00 - Foundation Models Created  
-- Created MediaFile.java - src/main/java/com/buttrcrm/aigen/models/scheduler/MediaFile.java
-- Created ScheduledEventStatus.java enum
-- Created SocialMediaPlatform.java enum  
-- Created ScheduledEvent.java entity
-- Added SOCIALSCHEDULER constant to DataModelPSKeys.java
-- All new files added to git staging
-- Compilation successful - no errors
-
-### 2025-08-01 10:40:00 - Error Encountered
-- ERROR: Failed to create repository interface
-- Cause: Missing JPA dependency in pom.xml
-- Resolution: Added spring-boot-starter-data-jpa dependency
-- Retrying repository creation...
-
-### 2025-08-01 10:45:00 - Service Layer Implementation
-- Created SchedulerService.java with core business logic
-- Implemented platform-specific posting strategies
-- Added comprehensive error handling
-- Unit tests created: SchedulerServiceTest.java
-- All tests passing (5/5)
+### {timestamp} - {Phase Name}
+- Action: {what was done}
+- Files: {files created/modified with full paths}
+- Result: {success/failure/partial}
+- Notes: {any issues or deviations from plan}
+- Time taken: {duration}
 ```
+
+### Error Handling Protocol
+1. **Compilation/Syntax errors**: Fix immediately, document fix in log
+2. **Missing dependencies**: Add to package.json/pom.xml/requirements.txt, re-run install
+3. **Test failures**: Fix if simple, otherwise document and continue
+4. **File not found**: Verify path, create parent directories if needed
+5. **Permission denied**: Document issue, suggest chmod/sudo fix
+
+### Completion Checklist
+Before marking task complete, verify:
+- □ All todos marked as done [x]
+- □ All files in plan created/modified
+- □ Tests written and passing
+- □ Lint/build commands successful
+- □ Progress log fully updated with timestamps
+- □ No unresolved errors documented
+- □ Code follows existing patterns from codebase
+- □ Documentation updated if specified in plan
+
+### Critical Requirements
+- Use EXACT file paths and line numbers from the plan
+- Use code snippets provided in the plan
+- Update progress log with timestamps after each phase
+- Handle errors gracefully and document them
+- Run lint/build/test commands after changes
+- For HARD complexity: Use Task tool for complex subtasks
