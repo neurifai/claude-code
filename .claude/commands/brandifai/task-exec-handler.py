@@ -6,35 +6,40 @@ import glob
 import re
 from datetime import datetime
 
+
 def check_task_status(task_file):
     """Check if task is already completed or blocked"""
     try:
         with open(task_file, 'r') as f:
             content = f.read()
-        
+
         if "## Final Status" in content:
-            status_section = content.split("## Final Status")[1].split("##")[0] if "##" in content.split("## Final Status")[1] else content.split("## Final Status")[1]
+            status_section = content.split("## Final Status")[1].split("##")[0] if "##" in \
+                                                                                   content.split("## Final Status")[
+                                                                                       1] else \
+            content.split("## Final Status")[1]
             if "COMPLETED" in status_section.upper():
                 return "completed"
             elif "FAILED" in status_section.upper():
                 return "failed"
             elif "BLOCKED" in status_section.upper():
                 return "blocked"
-        
+
         # Check if all todos are done
         if "- [ ]" not in content and "- [x]" in content:
             return "likely_completed"
-        
+
         return "ready"
     except:
         return "unknown"
+
 
 def get_execution_strategy(task_file):
     """Determine execution approach based on task complexity"""
     try:
         with open(task_file, 'r') as f:
             content = f.read()
-        
+
         if "**Assessed Complexity:** EASY" in content:
             return {
                 "strategy": "sequential",
@@ -64,38 +69,40 @@ def get_execution_strategy(task_file):
             "commit_frequency": "end"
         }
 
+
 def validate_task_ready(task_file):
     """Validate that task file is properly planned and ready for execution"""
     validation_errors = []
-    
+
     try:
         with open(task_file, 'r') as f:
             content = f.read()
-        
+
         # Check for execution plan
         if "## Implementation Plan" not in content and "## Execution Plan" not in content:
             validation_errors.append("Missing execution plan section")
-        
+
         # Check for file modifications table or structured plan
         if "## File Modifications" not in content and "| File Path |" not in content and "### File Modifications Table" not in content:
             validation_errors.append("Missing file modifications table")
-        
+
         # Check for uncompleted todos
         if not re.search(r'- \[ \]', content):
             validation_errors.append("No uncompleted todos found - task may already be complete")
-        
+
         # Check for unfilled sections
         if "[To be filled by Claude]" in content or "[To be updated" in content:
             validation_errors.append("Plan contains unfilled sections")
-        
+
         # Check for implementation steps
         if "## Implementation Steps" not in content and "### Implementation Steps" not in content and "## Detailed Steps" not in content:
             validation_errors.append("Missing implementation steps")
-            
+
     except Exception as e:
         validation_errors.append(f"Error reading task file: {e}")
-    
+
     return validation_errors
+
 
 def main():
     # Read hook input
@@ -103,8 +110,19 @@ def main():
     user_input = hook_data.get('input', '')
 
     if user_input.startswith('/brandifai:task-exec '):
-        task_file_pattern = user_input[21:].strip()  # Remove '/brandifai:task-exec '
-        
+        # Raw text format: /brandifai:task-exec task-name
+        is_brandifai_task_exec = True
+        task_file_pattern = user_input[21:].strip()
+    elif '<command-name>/brandifai:task-exec</command-name>' in user_input:
+        # XML format from Claude Code UI
+        is_brandifai_task_exec = True
+        # Extract command args from XML
+        import re
+        args_match = re.search(r'<command-args>(.*?)</command-args>', user_input, re.DOTALL)
+        if args_match:
+            task_file_pattern = args_match.group(1).strip()
+
+    if is_brandifai_task_exec:
         # Check if input is empty
         if not task_file_pattern:
             error_msg = """ERROR: Invalid usage of /brandifai:task-exec command.
@@ -117,17 +135,17 @@ Examples:
   /brandifai:task-exec api-endpoints
 
 The task-name-slug should match a previously planned task file."""
-            
+
             result = {
                 "input": error_msg,
                 "continue": False
             }
             print(json.dumps(result))
             return
-        
+
         # Find the task file
         task_file = None
-        
+
         # If it's a full path, use it directly
         if task_file_pattern.startswith('.claude/tasks/') and task_file_pattern.endswith('.md'):
             if os.path.exists(task_file_pattern):
@@ -139,17 +157,17 @@ The task-name-slug should match a previously planned task file."""
                 f".claude/tasks/*{task_file_pattern.replace(' ', '-')}*.md",
                 f".claude/tasks/*{task_file_pattern.replace(' ', '_')}*.md"
             ]
-            
+
             for pattern in search_patterns:
                 matches = glob.glob(pattern)
                 if matches:
                     # Use the most recent match
                     task_file = max(matches, key=os.path.getctime)
                     break
-        
+
         if task_file:
             print(f"Found task file: {task_file}")
-            
+
             # Check task status
             status = check_task_status(task_file)
             if status == "completed":
@@ -168,7 +186,7 @@ The task-name-slug should match a previously planned task file."""
                 }
                 print(json.dumps(result))
                 return
-            
+
             # Validate task is ready for execution
             validation_errors = validate_task_ready(task_file)
             if validation_errors:
@@ -182,10 +200,10 @@ Please run: /brandifai:task-plan {task_file_pattern} to complete the planning ph
                 }
                 print(json.dumps(result))
                 return
-            
+
             # Get execution strategy based on complexity
             strategy = get_execution_strategy(task_file)
-            
+
             # Create structured execution instructions
             progress_template = """When updating the task file progress log, use this format:
 ### {timestamp} - {Phase Name}
@@ -194,14 +212,14 @@ Please run: /brandifai:task-plan {task_file_pattern} to complete the planning ph
 - Result: {success/failure/partial}
 - Notes: {any issues or deviations from plan}
 - Time taken: {duration}"""
-            
+
             error_handling = """ERROR HANDLING PROTOCOL:
 1. Compilation/Syntax errors: Fix immediately, document fix in log
 2. Missing dependencies: Add to package.json/pom.xml/requirements.txt, re-run install
 3. Test failures: Fix if simple, otherwise document and continue
 4. File not found: Verify path, create parent directories if needed
 5. Permission denied: Document issue, suggest chmod/sudo fix"""
-            
+
             completion_checklist = """BEFORE MARKING TASK COMPLETE:
 □ All todos marked as done [x]
 □ All files in plan created/modified
@@ -211,7 +229,7 @@ Please run: /brandifai:task-plan {task_file_pattern} to complete the planning ph
 □ No unresolved errors documented
 □ Code follows existing patterns from codebase
 □ Documentation updated if specified in plan"""
-            
+
             execution_instructions = f"""TASK EXECUTION STARTED
 File: {task_file}
 Complexity Strategy: {strategy['strategy']}
@@ -251,7 +269,7 @@ Phase 4: Validation - Run lint/build, verify all changes
 {completion_checklist}
 
 Now execute the task from: {task_file}"""
-            
+
             result = {
                 "input": execution_instructions,
                 "continue": True
@@ -276,7 +294,7 @@ Now execute the task from: {task_file}"""
                     elif status == "likely_completed":
                         status_indicator = " [LIKELY COMPLETE]"
                     task_list += f"  - {task_name}{status_indicator}\n"
-            
+
             error_msg = f"""ERROR: Task file not found for: {task_file_pattern}{task_list}
 
 Please ensure:
@@ -288,13 +306,13 @@ Example workflow:
   /brandifai:task "User Auth" Implement JWT authentication
   /brandifai:task-plan user-auth
   /brandifai:task-exec user-auth"""
-            
+
             result = {
                 "input": error_msg,
                 "continue": False
             }
             print(f"Task file not found for pattern: {task_file_pattern}")
-        
+
         print(json.dumps(result))
     else:
         # Pass through unchanged
@@ -303,6 +321,7 @@ Example workflow:
             "continue": True
         }
         print(json.dumps(result))
+
 
 if __name__ == "__main__":
     main()

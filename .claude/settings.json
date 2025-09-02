@@ -2,7 +2,7 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "condition": "input.startsWith('/brandifai:help')",
+        "condition": "input.startsWith('/brandifai:help') || input.includes('<command-name>/brandifai:help</command-name>')",
         "hooks": [
           {
             "type": "command",
@@ -11,7 +11,7 @@
         ]
       },
       {
-        "condition": "input.startsWith('/brandifai:task ')",
+        "condition": "input.startsWith('/brandifai:task ') || input.includes('<command-name>/brandifai:task</command-name>')",
         "hooks": [
           {
             "type": "command",
@@ -20,7 +20,7 @@
         ]
       },
       {
-        "condition": "input.startsWith('/brandifai:task-plan ')",
+        "condition": "input.startsWith('/brandifai:task-plan ') || input.includes('<command-name>/brandifai:task-plan</command-name>')",
         "hooks": [
           {
             "type": "command",
@@ -29,7 +29,7 @@
         ]
       },
       {
-        "condition": "input.startsWith('/brandifai:task-exec ')",
+        "condition": "input.startsWith('/brandifai:task-exec ') || input.includes('<command-name>/brandifai:task-exec</command-name>')",
         "hooks": [
           {
             "type": "command",

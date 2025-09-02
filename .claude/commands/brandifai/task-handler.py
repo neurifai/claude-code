@@ -72,9 +72,24 @@ def main():
     hook_data = json.loads(sys.stdin.read())
     user_input = hook_data.get('input', '')
 
+    # Handle both raw text and XML command formats
+    is_brandifai_task = False
+    task_input = ""
+
     if user_input.startswith('/brandifai:task '):
-        task_input = user_input[16:].strip()  # Remove '/brandifai:task '
-        
+        # Raw text format: /brandifai:task "Name" description
+        is_brandifai_task = True
+        task_input = user_input[16:].strip()
+    elif '<command-name>/brandifai:task</command-name>' in user_input:
+        # XML format from Claude Code UI
+        is_brandifai_task = True
+        # Extract command args from XML
+        import re
+        args_match = re.search(r'<command-args>(.*?)</command-args>', user_input, re.DOTALL)
+        if args_match:
+            task_input = args_match.group(1).strip()
+
+    if is_brandifai_task:
         # Check if input is empty
         if not task_input:
             error_msg = """ERROR: Invalid usage of /brandifai:task command.
@@ -84,9 +99,9 @@ Correct usage: /brandifai:task "Task Name" detailed description
 Examples:
   /brandifai:task "User Auth" Implement JWT-based authentication with refresh tokens
   /brandifai:task "Payment Integration" Add Stripe payment processing with webhook handling
-  
+
 The task name should be in quotes, followed by a detailed description."""
-            
+
             result = {
                 "input": error_msg,
                 "continue": False
@@ -101,7 +116,7 @@ The task name should be in quotes, followed by a detailed description."""
             if end_quote != -1:
                 task_name_raw = task_input[1:end_quote]
                 task_description = task_input[end_quote + 1:].strip()
-                
+
                 # Validate that we have both name and description
                 if not task_name_raw:
                     error_msg = """ERROR: Task name cannot be empty.
@@ -113,7 +128,7 @@ Correct usage: /brandifai:task "Task Name" detailed description"""
                     }
                     print(json.dumps(result))
                     return
-                    
+
                 if not task_description:
                     error_msg = """ERROR: Task description is required.
 
@@ -212,16 +227,24 @@ Example: /brandifai:task "User Auth" Implement JWT-based authentication with ref
         print(f"File exists: {os.path.exists(filename)}")
         print(f"File size: {os.path.getsize(filename) if os.path.exists(filename) else 'N/A'} bytes")
 
-        # Prevent any code execution attempts
-        if any(keyword in task_description.lower() for keyword in ['implement', 'write', 'create', 'build', 'develop']):
-            new_input = f"STOP: Task file created at {filename}. DO NOT write any code. Use '/brandifai:task-plan {task_name}' to plan, then '/brandifai:task-exec {task_name}' to execute."
-        else:
-            new_input = f"IMPORTANT: Task file created at {filename}. NO CODE IMPLEMENTATION REQUIRED. This command ONLY creates the task structure. To proceed: 1) Optionally edit the file manually, 2) Run '/brandifai:task-plan {task_name}' for planning, 3) Run '/brandifai:task-exec {task_name}' for execution."
+        # Create success message
+        success_msg = f"""✅ Task file successfully created: {filename}
 
-        # Return modified input
+**Task:** {task_name_raw}
+**Complexity:** {complexity.upper()}
+**Description:** {task_description}
+
+## Next Steps:
+1. (Optional) Manually edit the task file to add more context
+2. Run `/brandifai:task-plan {task_name}` to generate implementation plan
+3. Run `/brandifai:task-exec {task_name}` to execute the plan
+
+⚠️ **IMPORTANT:** NO CODE HAS BEEN WRITTEN. This command ONLY creates the task file structure."""
+
+        # Stop processing completely - prevent ANY code execution
         result = {
-            "input": new_input,
-            "continue": True
+            "input": success_msg,
+            "continue": False  # THIS PREVENTS CLAUDE FROM CONTINUING!
         }
         print(json.dumps(result))
     else:
